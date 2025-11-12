@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calmify - Psychoterapia i Rozwój Osobisty</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='40' r='20' fill='%23339e4e' opacity='0.8'/%3E%3Ccircle cx='50' cy='40' r='15' fill='%232a7a3f'/%3E%3Cpath d='M35 60 L50 45 L65 60 L50 75 Z' fill='%23339e4e'/%3E%3Ccircle cx='50' cy='40' r='8' fill='%23ffffff'/%3E%3C/svg%3E">
+    <style>
+        /* Reset i podstawowe style */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            color: #2d3a2d;
+            line-height: 1.6;
+            background-color: #f8fbf8;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* Sekcja nagłówka z tłem */
+        .header-section {
+            background: linear-gradient(rgba(44, 82, 59, 0.85), rgba(34, 62, 46, 0.9)), 
+                        url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');
+            background-size: cover;
+            background-position: center;
+            color: white;
+            padding: 100px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent 65%, rgba(255,255,255,0.1) 65%, rgba(255,255,255,0.1) 70%, transparent 70%),
+                        linear-gradient(-45deg, transparent 65%, rgba(255,255,255,0.1) 65%, rgba(255,255,255,0.1) 70%, transparent 70%);
+            background-size: 50px 50px;
+            pointer-events: none;
+        }
+        
+        .header-section h1 {
+            font-size: 3.8rem;
+            margin-bottom: 20px;
+            letter-spacing: 3px;
+            font-weight: 300;
+        }
+        
+        .header-section p {
+            font-size: 1.3rem;
+            max-width: 600px;
+            margin: 0 auto;
+            font-weight: 300;
+        }
+        
+        /* Przyciski w prawym górnym rogu */
+        .auth-buttons {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 15px;
+            z-index: 10;
+        }
+        
+        .auth-button {
+            padding: 10px 20px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            background-color: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(5px);
+        }
+        
+        .auth-button:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .auth-button.login {
+            background-color: rgba(255, 255, 255, 0.15);
+        }
+        
+        .auth-button.register {
+            background-color: #4caf50;
+            border-color: #4caf50;
+        }
+        
+        .auth-button.register:hover {
+            background-color: #3d8b40;
+        }
+        
+        /* Kontener główny */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            flex: 1;
+        }
+        
+        /* Sekcja z gridem 3-kolumnowym */
+        .grid-section {
+            padding: 80px 0;
+        }
+        
+        .section-title {
+            text-align: center;
+            margin-bottom: 50px;
+            font-size: 2.2rem;
+            color: #2c5530;
+            font-weight: 400;
+        }
+        
+        /* Grid 3-kolumnowy */
+        .grid-3-columns {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 40px;
+        }
+        
+        /* Karty w gridzie */
+        .grid-card {
+            background: #339e4e;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(76, 118, 89, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border-top: 5px solid #2a7a3f;
+            position: relative;
+        }
+        
+        .grid-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(76, 118, 89, 0.2);
+            background: #2a8a45;
+        }
+        
+        .card-image {
+            height: 220px;
+            background-color: #e8f5e9;
+            background-size: cover;
+            background-position: center;
+            opacity: 0.9;
+            transform: rotate(-3deg) translateX(-10px);
+            margin: 15px;
+            border-radius: 5px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .grid-card:nth-child(even) .card-image {
+            transform: rotate(3deg) translateX(10px);
+        }
+        
+        .grid-card:hover .card-image {
+            transform: rotate(0) translateX(0);
+            opacity: 1;
+        }
+        
+        .card-content {
+            padding: 30px;
+        }
+        
+        .card-title {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: white;
+            font-weight: 500;
+        }
+        
+        .card-text {
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 25px;
+            line-height: 1.7;
+        }
+        
+        .card-button {
+            display: inline-block;
+            background-color: white;
+            color: #339e4e;
+            padding: 12px 25px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s;
+            border: 1px solid white;
+        }
+        
+        .card-button:hover {
+            background-color: transparent;
+            color: white;
+        }
+        
+        /* Sekcja informacyjna */
+        .info-section {
+            background: linear-gradient(135deg, #2c5530, #3a6940);
+            color: white;
+            padding: 80px 0;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .info-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent 65%, rgba(255,255,255,0.05) 65%, rgba(255,255,255,0.05) 70%, transparent 70%),
+                        linear-gradient(-45deg, transparent 65%, rgba(255,255,255,0.05) 65%, rgba(255,255,255,0.05) 70%, transparent 70%);
+            background-size: 50px 50px;
+            pointer-events: none;
+        }
+        
+        .info-section h2 {
+            font-size: 2.4rem;
+            margin-bottom: 30px;
+            font-weight: 400;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .info-section p {
+            max-width: 800px;
+            margin: 0 auto 30px;
+            font-size: 1.15rem;
+            color: #e8f5e9;
+            line-height: 1.8;
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* Styl dla nowego przycisku */
+        .help-button {
+            display: inline-block;
+            background-color: #4caf50;
+            color: white;
+            padding: 15px 35px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            border: 2px solid #4caf50;
+            margin-top: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            position: relative;
+            z-index: 1;
+        }
+        
+        .help-button:hover {
+            background-color: transparent;
+            color: #4caf50;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+        }
+        
+        /* Stopka */
+        footer {
+            background-color: #1a2c1f;
+            color: #e8f5e9;
+            text-align: center;
+            padding: 40px 20px;
+            margin-top: auto;
+        }
+        
+        footer p {
+            margin-bottom: 10px;
+        }
+        
+        .copyright {
+            font-size: 0.9rem;
+            color: #a8c6a9;
+            margin-top: 20px;
+        }
+        
+        /* Responsywność */
+        @media (max-width: 992px) {
+            .grid-3-columns {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .card-image {
+                transform: rotate(-2deg) translateX(-5px);
+            }
+            
+            .grid-card:nth-child(even) .card-image {
+                transform: rotate(2deg) translateX(5px);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .auth-buttons {
+                position: static;
+                justify-content: center;
+                margin-bottom: 20px;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .grid-3-columns {
+                grid-template-columns: 1fr;
+            }
+            
+            .header-section h1 {
+                font-size: 2.8rem;
+            }
+            
+            .header-section p {
+                font-size: 1.1rem;
+            }
+            
+            .help-button {
+                padding: 12px 25px;
+                font-size: 1rem;
+            }
+            
+            .card-image {
+                transform: rotate(0) translateX(0);
+                margin: 10px;
+            }
+            
+            .grid-card:nth-child(even) .card-image {
+                transform: rotate(0) translateX(0);
+            }
+            
+            .auth-buttons {
+                flex-direction: column;
+                align-items: center;
+                gap: 10px;
+            }
+            
+            .auth-button {
+                width: 150px;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sekcja nagłówka z tłem -->
+    <section class="header-section">
+        <!-- Przyciski logowania i rejestracji -->
+        <div class="auth-buttons">
+            <a href="#" class="auth-button login">Zaloguj się</a>
+            <a href="#" class="auth-button register">Zarejestruj się</a>
+        </div>
+        
+        <h1>Calmify</h1>
+        <p>Znajdź wewnętrzny spokój i równowagę dzięki profesjonalnej psychoterapii</p>
+    </section>
+
+    <!-- Główna zawartość strony -->
+    <div class="container">
+        <!-- Sekcja z gridem 3-kolumnowym -->
+        <section class="grid-section">
+            <h2 class="section-title">Nasze Usługi</h2>
+            
+            <div class="grid-3-columns">
+                <!-- Karta 1 -->
+                <div class="grid-card">
+                    <div class="card-image" style="background-image: url('https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-1.2.1&auto=format&fit=crop&w=634&q=80');"></div>
+                    <div class="card-content">
+                        <h3 class="card-title">Terapia Indywidualna</h3>
+                        <p class="card-text">Oferujemy indywidualne sesje terapeutyczne dostosowane do Twoich potrzeb i celów. Pracujemy w bezpiecznej, poufnej przestrzeni, wspierając Cię w procesie zmiany i rozwoju.</p>
+                        <a href="#" class="card-button">Dowiedz się więcej</a>
+                    </div>
+                </div>
+                
+                <!-- Karta 2 -->
+                <div class="grid-card">
+                    <div class="card-image" style="background-image: url('https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?ixlib=rb-1.2.1&auto=format&fit=crop&w=1220&q=80');"></div>
+                    <div class="card-content">
+                        <h3 class="card-title">Mindfulness i Relaksacja</h3>
+                        <p class="card-text">Poznaj techniki uważności, które pomogą Ci radzić sobie ze stresem, zwiększyć samoświadomość i poprawić jakość życia. Naucz się być obecnym tu i teraz.</p>
+                        <a href="#" class="card-button">Dowiedz się więcej</a>
+                    </div>
+                </div>
+                
+                <!-- Karta 3 -->
+                <div class="grid-card">
+                    <div class="card-image" style="background-image: url('https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?ixlib=rb-1.2.1&auto=format&fit=crop&w=1335&q=80');"></div>
+                    <div class="card-content">
+                        <h3 class="card-title">Warsztaty Rozwojowe</h3>
+                        <p class="card-text">Dołącz do naszych warsztatów grupowych, gdzie w bezpiecznej atmosferze pracujemy nad rozwojem osobistym, umiejętnościami społecznymi i radzeniem sobie z emocjami.</p>
+                        <a href="#" class="card-button">Dowiedz się więcej</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Sekcja informacyjna -->
+    <section class="info-section">
+        <div class="container">
+            <h2>Czym jest psychoterapia?</h2>
+            <p>Psychoterapia to bezpieczna i wspierająca przestrzeń, w której możesz zgłębiać swoje myśli i emocje. W Calmify wierzymy, że każdy ma w sobie siłę do zmiany i rozwoju. W zależności od Twoich potrzeb, terapia może być krótkoterminowa, skupiająca się na konkretnych problemach, lub długoterminowa, pomagająca w głębszych przemianach.</p>
+            <p>W praktyce psychoterapia stanowi przyjazne środowisko dla zdrowia psychicznego i fizycznego, które pomaga poprawić samopoczucie i rozwijać zdrowsze strategie radzenia sobie z wyzwaniami życia codziennego.</p>
+            
+            <!-- Nowy przycisk -->
+            <a href="#" class="help-button">Potrzebujesz więcej pomocy?</a>
+        </div>
+    </section>
+
+    <!-- Stopka -->
+    <footer>
+        <div class="container">
+            <p>Calmify - Centrum Psychoterapii i Rozwoju Osobistego</p>
+            <p>ul. Spokojna 123, 00-001 Warszawa</p>
+            <p>tel: +48 123 456 789 | email: kontakt@calmify.pl</p>
+            <p class="copyright">© 2025 Calmify. Wszelkie prawa zastrzeżone. Kod strony chroniony prawem autorskim.</p>
+        </div>
+    </footer>
+</body>
+</html>
