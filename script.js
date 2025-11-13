@@ -4,3 +4,7 @@ function showForm(formId) {
   });
   document.getElementById(formId).classList.add("active");
 }
+
+document.addEventListener("DOMContentLoaded", () => {
+  showForm("login-form");
+});
