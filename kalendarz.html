@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Kalendarz Anstystresowy</title>
+  <style>
+    :root{
+      --green-1:#e9f6ec;
+      --green-2:#d2f0d6;
+      --accent:#2f8f4a;
+      --accent-dark:#256f3a;
+      --card-shadow: 0 6px 18px rgba(38,89,46,0.12);
+      --radius:12px;
+      --max-width:1100px;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+    body{background:linear-gradient(180deg,var(--green-1),#f6fff6);display:flex;align-items:center;justify-content:center;min-height:100vh;margin:20px}
+    .wrap{width:100%;max-width:var(--max-width);}
+    header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+    h1{color:var(--accent);margin:0;font-size:1.6rem}
+    p.lead{margin:0;color:#2b4b33}
+
+    .calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:12px}
+    .day{background:var(--green-2);border-radius:var(--radius);padding:12px;box-shadow:var(--card-shadow);cursor:pointer;transition:transform .15s ease, box-shadow .15s ease;position:relative;overflow:hidden}
+    .day:hover{transform:translateY(-4px)}
+    .day .num{font-weight:700;color:var(--accent-dark);font-size:1.1rem}
+    .day .title{display:none;}
+    .panel{max-height:0;overflow:hidden;transition:max-height .28s ease, padding .18s ease;}
+    .day.open{grid-column:auto;background:white}
+    .day.open .panel{padding-top:10px;max-height:1200px}
+    .exercise{ text-align: center;background:#f7fff7;border-radius:10px;padding:10px;border:1px solid rgba(37,111,58,0.06)}
+    .exercise h4{margin:0 0 8px 0;color:var(--accent)}
+    .exercise p{margin:0 0 8px 0;color:#355f3d}
+    .exercise ol{margin:8px 0 0 18px;color:#355f3d}
+
+    /* responsive */
+    @media (max-width:760px){
+      .calendar{grid-template-columns:repeat(3,1fr)}
+    }
+    @media (max-width:420px){
+      .calendar{grid-template-columns:repeat(2,1fr)}
+      h1{font-size:1.2rem}
+    }
+
+    footer{margin-top:16px;color:#23402b;font-size:0.9rem}
+
+    /* small helper style for close button */
+    .toggle-btn{position:absolute;right:10px;top:10px;background:transparent;border:none;color:var(--accent-dark);font-weight:700}
+  .day.open .title{display:block;}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div>
+        <h1>Pierwszy miesiąc</h1>
+        <p class="lead">Kliknij dowolny dzień, by rozwinąć i zobaczyć krótkie ćwiczenie na stres.</p>
+      </div>
+      <div style="text-align:right;color:#2b4b33;font-size:0.9rem"></div>
+    </header>
+
+    <main>
+      <div class="calendar" id="calendar">
+        <!-- days inserted by JS -->
+      </div>
+    </main>
+
+    <footer>
+      <small>Kazde cwiczenie:
+   <li>Zrób przez 3–10 minut.</li>
+   <li>Skup się na oddechu, jeżeli umysł błądzi — delikatnie przywróć uwagę.</li>
+   <li>Gdy skończysz, zapisz krótką notatkę: jak się czujesz?</li></small>
+    </footer>
+  </div>
+
+  <script>
+    const exercises = [
+      {title:'Oddech 4-4-4', text:'Weź 6-8 głębokich oddechów. Wdech 4 sekundy, przytrzymaj 4, wydech 4.'},
+      {title:'Skanowanie ciała', text:'Skup się kolejno na stopach, łydkach, udach... rozluźniając każdą część po 5–10 s.'},
+      {title:'Spacer uważny', text:'Wyjdź na 10 min spaceru, zwracaj uwagę na kroki i oddech.'},
+      {title:'Progresywne napinanie', text:'Napnij mięśnie całego ciała przez 6 s, potem rozluźnij — powtórz 3x.'},
+      {title:'Zapis 3 rzeczy', text:'Zapisz 3 rzeczy, za które dziś jesteś wdzięczny.'},
+      {title:'Mini medytacja 5 min', text:'Ustaw timer na 5 min i obserwuj oddech bez oceniania.'},
+      {title:'Ćwiczenia rozciągające', text:'Szybki zestaw: szyja, ramiona, klatka, biodra — 5 min.'},
+      {title:'Oddychanie przeponowe', text:'Połóż rękę na brzuchu, wdech nosem tak by brzuch się uniósł, wydech ustami.'},
+      {title:'Technika 5-4-3-2-1', text:'Wymień 5 rzeczy, które widzisz, 4 których dotykasz, 3 do słyszenia, 2 do powąchania, 1 do smaku.'},
+      {title:'Krótka gimnastyka', text:'Seria pajacyków, przysiadów i skrętów tułowia — 3 minuty.'},
+      {title:'Muzyka relaksacyjna', text:'Włącz ulubioną spokojną piosenkę i skup się na instrumentach.'},
+      {title:'Rysunek bez celu', text:'Weź kartkę i rysuj swobodnie przez 10 minut.'},
+      {title:'Technika pudełka (box breathing)', text:'Wdech 4s, zatrzymaj 4s, wydech 4s, zatrzymaj 4s — 6 rund.'},
+      {title:'Krótka przerwa od ekranu', text:'Odłóż telefon na 15 minut; zrób parę głębokich oddechów.'},
+      {title:'Afirmacje', text:'Powiedz na głos 3 pozytywne zdania o sobie.'},
+      {title:'Joga na krześle', text:'Kilka prostych pozycji siedzących — szyja, ramiona, skręty tułowia.'},
+      {title:'Uwaga na zmysły', text:'Skoncentruj się przez 2 minuty na jednym zmysle — słuchaniu.'},
+      {title:'List do siebie', text:'Napisz krótki, wspierający list do siebie na przyszłość.'},
+      {title:'Aromaterapia', text:'Użyj zapachu (olejek/cytryna/herbata) i oddychaj powoli.'},
+      {title:'Pauza 1 minuty', text:'Zamknij oczy i po prostu bądź przez 60 sekund.'},
+      {title:'Ćwiczenia oczu', text:'Patrz w dal 20s, potem skup blisko, powtórz 5x.'},
+      {title:'Zapis myśli', text:'Wypisz na kartce wszystkie natrętne myśli — uwolnij je z głowy.'},
+      {title:'Świadome jedzenie', text:'Zjedz małą przekąskę powoli, odnajdując każdy smak.'},
+      {title:'Rozciąganie pleców', text:'Delikatne skręty i skłony — 5 minut.'},
+      {title:'Rytuał oddechowy przed snem', text:'Trójstopniowy oddech: powoli wydłużaj wydech.'},
+      {title:'Krótkie cold splash', text:'Zimna woda na nadgarstki lub twarz (30s) — odświeża.'},
+      {title:'Słowa uznania', text:'Powiedz komuś "dziękuję" albo pochwól kogoś na głos.'},
+      {title:'Wizualizacja', text:'Wyobraź sobie spokojne miejsce przez 3–5 minut.'},
+      {title:'Skrzynka narzędzi emocji', text:'Zapisz 3 rzeczy, które pomagają ci się uspokoić — trzy opcje na później.'},
+      {title:'Oddychanie 7-11', text:'Wdech 4s, wydech 6–8s (lub 7/11 rytm) — 5 powtórzeń.'}
+    ];
+
+    const calendarEl = document.getElementById('calendar');
+
+    // create 30 day cards
+    for(let i=1;i<=30;i++){
+      const day = document.createElement('button');
+      day.className='day';
+      day.setAttribute('aria-expanded','false');
+      day.innerHTML = `
+        <div class="num">Dzień ${i}</div>
+        <div class="title">${exercises[i-1].title}</div>
+        <button class="toggle-btn" aria-hidden>+</button>
+        <div class="panel" role="region">
+          <div class="exercise">
+            <h4>${exercises[i-1].title}</h4>
+            <p>${exercises[i-1].text}</p>
+            
+          </div>
+        </div>
+      `;
+
+      // click handler
+      day.addEventListener('click', (e)=>{
+        // don't let inner button steal focus
+        if(e.target.classList.contains('toggle-btn')) return;
+        const alreadyOpen = day.classList.contains('open');
+        // close others
+        document.querySelectorAll('.day.open').forEach(d=>{
+          if(d!==day){ d.classList.remove('open'); d.setAttribute('aria-expanded','false'); d.querySelector('.toggle-btn').textContent='+'; }
+        });
+        if(alreadyOpen){
+          day.classList.remove('open');
+          day.setAttribute('aria-expanded','false');
+          day.querySelector('.toggle-btn').textContent='+';
+        } else {
+          day.classList.add('open');
+          day.setAttribute('aria-expanded','true');
+          day.querySelector('.toggle-btn').textContent='−';
+          // scroll into view nicely
+          setTimeout(()=>day.scrollIntoView({behavior:'smooth',block:'center'}),180);
+        }
+      });
+
+      // allow toggle button to close/open as well
+      day.querySelector('.toggle-btn').addEventListener('click',(e)=>{
+        e.stopPropagation();
+        day.click();
+      });
+
+      calendarEl.appendChild(day);
+    }
+  </script>
+</body>
+</html>
