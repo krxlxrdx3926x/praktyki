@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Kalendarz Antystresowy – Miesiąc 3</title>
+  <style>
+    :root{
+      --green-1:#d7eee6;
+      --green-2:#b8e0d2;
+      --accent:#0f5a3e;
+      --accent-dark:#09412c;
+      --card-shadow: 0 6px 18px rgba(9,65,44,0.18);
+      --radius:12px;
+      --max-width:1100px;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+
+    body{background:linear-gradient(180deg,var(--green-1),#e9fef4);display:flex;align-items:center;justify-content:center;min-height:100vh;margin:20px}
+    .wrap{width:100%;max-width:var(--max-width);}    
+    header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+    h1{color:var(--accent);margin:0;font-size:1.6rem}
+
+    .calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:12px}
+    .day{background:var(--green-2);border-radius:var(--radius);padding:12px;box-shadow:var(--card-shadow);cursor:pointer;transition:transform .15s ease, box-shadow .15s ease;position:relative;overflow:hidden}
+    .day:hover{transform:translateY(-4px)}
+    .day .num{font-weight:700;color:var(--accent-dark);font-size:1.1rem}
+    .day .title{display:none;}
+    .panel{max-height:0;overflow:hidden;transition:max-height .28s ease, padding .18s ease;}
+    .day.open{grid-column:auto;background:white}
+    .day.open .panel{padding-top:10px;max-height:1200px}
+    .exercise{ text-align: center;background:#f6fffa;border-radius:10px;padding:10px;border:1px solid rgba(9,65,44,0.08)}
+    .exercise h4{margin:0 0 8px 0;color:var(--accent)}
+    .exercise p{margin:0 0 8px 0;color:#103d2e}
+
+    @media (max-width:760px){ .calendar{grid-template-columns:repeat(3,1fr)} }
+    @media (max-width:420px){ .calendar{grid-template-columns:repeat(2,1fr)} h1{font-size:1.2rem} }
+
+    footer{margin-top:16px;color:#103d2e;font-size:0.9rem}
+
+    .toggle-btn{position:absolute;right:10px;top:10px;background:transparent;border:none;color:var(--accent-dark);font-weight:700}
+    .day.open .title{display:block;}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div>
+        <h1>Trzeci miesiąc</h1>
+        <p class="lead">Kolejne 30 ćwiczeń dla budowania spokoju.</p>
+      </div>
+    </header>
+
+    <main>
+      <div class="calendar" id="calendar"></div>
+    </main>
+
+    <footer>
+      <small>Codziennie mały krok, 3–10 min praktyki. Oddech, uważność, ruch.</small>
+    </footer>
+  </div>
+
+  <script>
+    const exercises = [
+      {title:'Oddychanie falowe', text:'Wyobrażaj sobie oddech jak falę unoszącą i opuszczającą ciało.'},
+      {title:'Relaks szczęki', text:'Rozluźnij szczękę, opuść język, zrób 5 spokojnych oddechów.'},
+      {title:'Powolny stretching ramion', text:'Unieś ramiona i opuść je z wydechem — 12x.'},
+      {title:'Skan emocji', text:'Zauważ: co dokładnie teraz czuję? Nazwij emocję.'},
+      {title:'Rozciąganie boczne', text:'Delikatne skłony w bok — po 30 sekund.'},
+      {title:'Wydech kojący', text:'Oddychaj tak, by wydech był 2x dłuższy niż wdech.'},
+      {title:'Uważne picie', text:'Weź łyk napoju, poczuj temperaturę i smak powoli.'},
+      {title:'Wytrząsanie napięcia', text:'Strząśnij lekko ręce i nogi przez 30–60s.'},
+      {title:'Patrzenie w dal', text:'Oderwij oczy od ekranu i patrz w odległy punkt przez 20–30s.'},
+      {title:'Uspokajanie brzucha', text:'Połóż dłoń na brzuchu i oddychaj do środka — 10 oddechów.'},
+      {title:'Rozciąganie kręgosłupa', text:'Powolne skręty i wyciąganie do góry.'},
+      {title:'Obserwacja przestrzeni', text:'Rozejrzyj się i zauważ 5 rzeczy o spokojnych kolorach.'},
+      {title:'Uważne kroki', text:'Przejdź 20 kroków, czując kontakt stóp z podłożem.'},
+      {title:'Mini uspokojenie dłoni', text:'Złóż dłonie i poczuj ich ciepło.'},
+      {title:'Świadoma pauza', text:'Zrób przerwę, weź 3 głębokie oddechy.'},
+      {title:'Rozciąganie klatki', text:'Otwórz szeroko klatkę piersiową — 5 powolnych oddechów.'},
+      {title:'Technika „łagodna uwaga”', text:'Zauważ myśl i delikatnie wróć do oddechu.'},
+      {title:'Chwilowy masaż skroni', text:'Koliste ruchy przez 30–40 sekund.'},
+      {title:'Mikroprzerwa na wodę', text:'Napij się powoli, obserwując ruch dłoni i oddechu.'},
+      {title:'Ciche siedzenie', text:'Usiądź na 1–2 min bez ruchu i obserwuj ciało.'},
+      {title:'Powolne krążenia głowy', text:'Bardzo łagodne, powolne ruchy szyi.'},
+      {title:'Skupienie na jednym dźwięku', text:'Wybierz dźwięk i śledź go przez kilkanaście sekund.'},
+      {title:'Rozciąganie łydek', text:'Delikatne przytrzymanie pozycji przez 20–30s.'},
+      {title:'Oddech „zawiasowy”', text:'Wydech przez lekko uchylone usta, wdech nosem — 8 cykli.'},
+      {title:'Odpuszczanie ramion', text:'Podnieś ramiona do góry i „upuść” je z wydechem.'},
+      {title:'Rozgrzewanie dłoni', text:'Pocieraj dłonie, aż poczujesz ciepło.'},
+      {title:'Uważny dotyk', text:'Dotknij czegoś w pobliżu i zbadaj fakturę.'},
+      {title:'Oddech kwadratowy 3-3-3-3', text:'Wdech 3s, zatrzymanie 3s, wydech 3s, zatrzymanie 3s — 5 rund.'},
+      {title:'Wyobrażenie ciężaru', text:'Poczuj, jak ciało staje się cięższe i bardziej stabilne.'},
+      {title:'Wdzięczność za chwilę', text:'Nazwij jedną rzecz, za którą teraz możesz być wdzięczny.'}
+    ];
+
+    const calendarEl = document.getElementById('calendar');
+
+    for(let i=1;i<=30;i++){
+      const day = document.createElement('button');
+      day.className='day';
+      day.setAttribute('aria-expanded','false');
+      day.innerHTML = `
+        <div class=\"num\">Dzień ${i}</div>
+        <div class=\"title\">${exercises[i-1].title}</div>
+        <button class=\"toggle-btn\" aria-hidden>+</button>
+        <div class=\"panel\" role=\"region\">
+          <div class=\"exercise\">
+            <h4>${exercises[i-1].title}</h4>
+            <p>${exercises[i-1].text}</p>
+          </div>
+        </div>`;
+
+      day.addEventListener('click', (e)=>{
+        if(e.target.classList.contains('toggle-btn')) return;
+        const alreadyOpen = day.classList.contains('open');
+
+        document.querySelectorAll('.day.open').forEach(d=>{
+          if(d!==day){ d.classList.remove('open'); d.setAttribute('aria-expanded','false'); d.querySelector('.toggle-btn').textContent='+'; }
+        });
+
+        if(alreadyOpen){
+          day.classList.remove('open');
+          day.setAttribute('aria-expanded','false');
+          day.querySelector('.toggle-btn').textContent='+';
+        } else {
+          day.classList.add('open');
+          day.setAttribute('aria-expanded','true');
+          day.querySelector('.toggle-btn').textContent='−';
+          setTimeout(()=>day.scrollIntoView({behavior:'smooth',block:'center'}),180);
+        }
+      });
+
+      day.querySelector('.toggle-btn').addEventListener('click',(e)=>{
+        e.stopPropagation();
+        day.click();
+      });
+
+      calendarEl.appendChild(day);
+    }
+  </script>
+</body>
+</html>
